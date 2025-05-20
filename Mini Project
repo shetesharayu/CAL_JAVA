@@ -1,0 +1,92 @@
+
+// DairyManagementSystem.java
+// Run this with Hibernate dependencies configured
+
+import javax.persistence.*;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.cfg.Configuration;
+import java.util.Date;
+
+@Entity
+class Customer {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int id;
+    private String name;
+    private String address;
+    private String contact;
+
+    // Getters and Setters
+    public int getId() { return id; }
+    public void setId(int id) { this.id = id; }
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
+    public String getAddress() { return address; }
+    public void setAddress(String address) { this.address = address; }
+    public String getContact() { return contact; }
+    public void setContact(String contact) { this.contact = contact; }
+}
+
+@Entity
+class MilkRecord {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int id;
+    private double quantity;
+    private double fatContent;
+
+    @Temporal(TemporalType.DATE)
+    private Date date;
+
+    @ManyToOne
+    private Customer customer;
+
+    // Getters and Setters
+    public int getId() { return id; }
+    public void setId(int id) { this.id = id; }
+    public double getQuantity() { return quantity; }
+    public void setQuantity(double quantity) { this.quantity = quantity; }
+    public double getFatContent() { return fatContent; }
+    public void setFatContent(double fatContent) { this.fatContent = fatContent; }
+    public Date getDate() { return date; }
+    public void setDate(Date date) { this.date = date; }
+    public Customer getCustomer() { return customer; }
+    public void setCustomer(Customer customer) { this.customer = customer; }
+}
+
+public class DairyManagementSystem {
+    public static void main(String[] args) {
+        SessionFactory factory = new Configuration()
+            .configure("hibernate.cfg.xml")
+            .addAnnotatedClass(Customer.class)
+            .addAnnotatedClass(MilkRecord.class)
+            .buildSessionFactory();
+
+        Session session = factory.openSession();
+
+        try {
+            session.beginTransaction();
+
+            Customer customer = new Customer();
+            customer.setName("Sharayu");
+            customer.setAddress("Kopargaon");
+            customer.setContact("9876543210");
+
+            session.save(customer);
+
+            MilkRecord record = new MilkRecord();
+            record.setCustomer(customer);
+            record.setQuantity(5.0);
+            record.setFatContent(4.5);
+            record.setDate(new Date());
+
+            session.save(record);
+
+            session.getTransaction().commit();
+        } finally {
+            session.close();
+            factory.close();
+        }
+    }
+}
